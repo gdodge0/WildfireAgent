@@ -26,7 +26,7 @@ class Fire:
 
     def return_summary(self):
         summary = {
-            "description": "An update to date summary of wildfire information from Watch Duty",
+            "description": "An update to date summary of wildfire information from Watch Duty. This is context for your chat session.",
             "messages": []
         }
 
@@ -38,8 +38,12 @@ class Fire:
             })
 
         for result in data["results"]:
+            try:
+                author = result["user_created"]["display_name"]
+            except TypeError:
+                author = "staff"
             summary["messages"].append({
-                "author": result["user_created"]["display_name"],
+                "author": author,
                 "timestamp": result["date_created"],
                 "message": result["message"]
             })
