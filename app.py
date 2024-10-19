@@ -6,7 +6,6 @@ import time
 import platform
 
 import httpx
-from pyasn1.type.error import ValueConstraintError
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify, request
 from models.models import ChatSession, db
@@ -243,9 +242,9 @@ def hello(websocket):
                     print(chat_session.chat_ctx)
 
                 dg_connection.flush()
-            except ValueConstraintError as e:
+            except ValueError as e:
                 print(f"llm excetion: {e}")
-    except ValueConstraintError as e:
+    except ValueError as e:
         dg_connection.finish()
 
 @app.route('/api/v1/start_chat_session')
@@ -271,6 +270,7 @@ def start_LLM_session():
     return jsonify({
         "success": True,
         "session_id": chat_session.id,
+        "event_data": summary["messages"]["geo_events"][0]
     })
 
 
