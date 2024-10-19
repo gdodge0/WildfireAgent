@@ -1,10 +1,14 @@
+import base64
 import json
 import logging
 import multiprocessing
 import time
 import platform
 import os
+from sqlite3 import SQLITE_ERROR
 
+import httpx
+from sqlalchemy.testing.suite import ExceptionTest
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify
 
@@ -13,6 +17,8 @@ from deepgram import (
     DeepgramClientOptions,
     SpeakWSOptions,
     SpeakWebSocketEvents,
+    FileSource,
+    PrerecordedOptions
 )
 
 import os
@@ -121,22 +127,43 @@ def hello(websocket):
     try:
         while True:
             message = websocket.recv()
-            print(f"message from UI: {message}")
+            #print(f"message from UI: {message}")
 
             data = json.loads(message)
-            text = data.get("text")
+
+            media = data.get("media")
             geo_id = data.get("fire_id")
             voice_model = "aura-asteria-en"
 
-            if not geo_id:
-                if app.debug:
-                    app.logger.debug("You must provide a fire ID")
-                continue
+            split_media = media.split(',')
 
-            if not text:
-                if app.debug:
-                    app.logger.debug("You must supply text to synthesize.")
-                continue
+            media_file = base64.b64decode(split_media[-1])
+
+            # Transcription
+
+            payload: FileSource = {
+                "buffer": media_file,
+            }
+
+            options: PrerecordedOptions = PrerecordedOptions(
+                model="nova-2",
+                smart_format=True,
+                utterances=True,
+                punctuate=True,
+                diarize=True,
+            )
+
+            response = deepgram.listen.rest.v("1").transcribe_file(
+                payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
+            )
+
+            print(response)
+
+            utterances = response["results"]["utterances"]
+            if len(utterances) == 0:
+                text = "<No Text Provided>"
+            else:
+                text = utterances[0]["transcript"]
 
             # Are we connected to the Deepgram TTS WS?
             if connected is False:
@@ -168,9 +195,9 @@ def hello(websocket):
                     dg_connection.send_text(llm_output)
 
                 dg_connection.flush()
-            except ValueError as e:
+            except Exception as e:
                 print(f"llm excetion: {e}")
-    except ValueError as e:
+    except Exception as e:
         dg_connection.finish()
 
 
@@ -191,6 +218,10 @@ def serve_image(filename):
 @app.route("/sample", methods=["GET"])
 def serve_index():
     return app.send_static_file("index.html")
+
+@app.route("/overflow", methods=["GET"])
+def overflow():
+    return app.send_static_file("overflow_test.html")
 
 
 def run_ui():
