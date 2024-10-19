@@ -23,8 +23,9 @@ const fetchFireSummary = async () => {
         geo_id: props.id,
       },
     });
-    fireSummary.value = response.data; // Store the data in fireSummary
-z  } catch (err) {
+    fireSummary.value = response.data;
+    console.log(response.data)
+  } catch (err) {
     error.value = 'Failed to fetch fire information';
   }
 };
