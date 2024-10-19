@@ -1,4 +1,5 @@
 import json
+import logging
 import multiprocessing
 import time
 import platform
@@ -18,6 +19,8 @@ import os
 import google.generativeai as genai
 
 from dotenv import load_dotenv
+
+from api.watchduty import get_fire_summary
 
 load_dotenv()
 
@@ -122,7 +125,13 @@ def hello(websocket):
 
             data = json.loads(message)
             text = data.get("text")
+            geo_id = data.get("fire_id")
             voice_model = "aura-asteria-en"
+
+            if not geo_id:
+                if app.debug:
+                    app.logger.debug("You must provide a fire ID")
+                continue
 
             if not text:
                 if app.debug:
@@ -147,6 +156,11 @@ def hello(websocket):
 
             chat = model.start_chat()
             try:
+                app.logger.debug("Providing agent with context")
+                ctx_response = chat.send_message(str(get_fire_summary(geo_id)))
+                for chunk in ctx_response:
+                    pass
+                app.logger.debug("Asking user question.")
                 response = chat.send_message(text)
                 for chunk in response:
                     llm_output = chunk.text
@@ -154,9 +168,9 @@ def hello(websocket):
                     dg_connection.send_text(llm_output)
 
                 dg_connection.flush()
-            except Exception as e:
+            except ValueError as e:
                 print(f"llm excetion: {e}")
-    except Exception as e:
+    except ValueError as e:
         dg_connection.finish()
 
 
@@ -186,6 +200,7 @@ def run_ws():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     if platform.system() == "Darwin":
         multiprocessing.set_start_method("fork")
 

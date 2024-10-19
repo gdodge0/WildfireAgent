@@ -69,6 +69,7 @@ function sendData() {
     const modelSelect = document.getElementById("models");
     const selectedModel = modelSelect.options[modelSelect.selectedIndex].value;
     const textInput = document.getElementById("text-input").value;
+    const fireID = document.getElementById('fire-id').value;
     if (!textInput) {
         errorMessage.innerHTML = "ERROR: Please add text!";
     } else {
@@ -87,6 +88,7 @@ function sendData() {
             socket.addEventListener("open", () => {
                 const data = {
                     text: textInput,
+                    fire_id: fireID
                 };
                 socket.send(JSON.stringify(data));
             });
