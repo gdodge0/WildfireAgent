@@ -4,20 +4,20 @@ import FireItem from "@/components/FireItem.vue";
 import WatchingItem from "@/components/WatchingItem.vue";
 
 const fireItems = ref([
-  { id: '1', news: "The fire has spread throughout the city", proximity: "13mi", size: "10k acres", containment: "0%", location: "San Bernandino", name: "Line fire" },
-  { id: '2', news: "Fire near forest area", proximity: "20mi", size: "2k acres", containment: "30%", location: "Angeles National Forest", name: "Forest Fire" }
+  { id: '33389', news: "The fire has spread throughout the city", proximity: "13mi", size: "10k acres", containment: "0%", location: "San Bernandino", name: "Line fire" },
+  { id: '33389', news: "Fire near forest area", proximity: "20mi", size: "2k acres", containment: "30%", location: "Angeles National Forest", name: "Forest Fire" }
 ]);
 
 // Watching Items state
 const watchingItems = ref([
-  { id: `1`, name: "Line Fire", bg: "bg-red-500" },
-  { id: `2`, name: "Airport Fire", bg: "bg-green-500" }
+  { id: `33389`, name: "Line Fire", bg: "bg-red-500" },
+  { id: `33389`, name: "Airport Fire", bg: "bg-green-500" }
 ]);
 
 // Function to add a new Fire Item
 const addFireItem = () => {
   const newFireItem = {
-    id: `${fireItems.value.length + 1}`,
+    id: `33389`,
     news: "New fire reported in the area",
     proximity: "5mi",
     size: "500 acres",
@@ -31,7 +31,7 @@ const addFireItem = () => {
 // Function to add a new Watching Item
 const addWatchingItem = () => {
   const newWatchingItem = {
-    id: `${watchingItems.value.length + 1}`,
+    id: `33389`,
     name: "New Watch Fire",
     bg: "bg-blue-500"
   };

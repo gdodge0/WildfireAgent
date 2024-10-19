@@ -5,7 +5,7 @@ import multiprocessing
 import time
 import platform
 import os
-from sqlite3 import SQLITE_ERROR
+from flask_cors import CORS
 
 import httpx
 from sqlalchemy.testing.suite import ExceptionTest
@@ -202,6 +202,7 @@ def hello(websocket):
 
 
 @app.route('/api/v1/get_fire_info')
+@cross_origin()
 def get_fire_info():
     return jsonify(get_current_fires())
 

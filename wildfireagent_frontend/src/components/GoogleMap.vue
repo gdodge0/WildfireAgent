@@ -39,7 +39,7 @@ const flameIcon = {
 <template>
   <GoogleMap
       :api-key="gmaps_api_key"
-      style="width: 80%; height: 500px"
+      style="width: 100%; height: 250px"
       :center="center"
       :zoom="12"
   >
@@ -53,8 +53,5 @@ const flameIcon = {
 </template>
 
 <style scoped>
-.map-container {
-  display: flex;
-  justify-content: center;
-}
+
 </style>
