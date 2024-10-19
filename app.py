@@ -6,7 +6,7 @@ import platform
 import os
 
 from websockets.sync.server import serve
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 
 from deepgram import (
     DeepgramClient,
@@ -20,7 +20,7 @@ import google.generativeai as genai
 
 from dotenv import load_dotenv
 
-from api.watchduty import get_fire_summary
+from api.watchduty import get_fire_summary, get_current_fires
 
 load_dotenv()
 
@@ -174,6 +174,9 @@ def hello(websocket):
         dg_connection.finish()
 
 
+@app.route('/api/v1/get_fire_info')
+def get_fire_info():
+    return jsonify(get_current_fires())
 
 @app.route("/<path:filename>")
 def serve_others(filename):
