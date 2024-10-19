@@ -48,9 +48,9 @@ defineProps({
         <span>News</span>
         <p>{{ news }}</p>
       </div>
-      <button class="px-4 py-2 rounded-full border border-red-500 bg-transparent hover:bg-red-500 text-red-500 hover:text-white font-medium transition-all">
+      <router-link :to="{ path: '/detail/' + id }" class="px-4 py-2 rounded-full border border-red-500 bg-transparent hover:bg-red-500 text-red-500 hover:text-white font-medium transition-all">
         Watch
-      </button>
+      </router-link>
     </div>
   </div>
 </template>
