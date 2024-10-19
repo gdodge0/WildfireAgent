@@ -10,7 +10,7 @@ from sqlite3 import SQLITE_ERROR
 import httpx
 from sqlalchemy.testing.suite import ExceptionTest
 from websockets.sync.server import serve
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 
 from deepgram import (
     DeepgramClient,
@@ -204,6 +204,10 @@ def hello(websocket):
 @app.route('/api/v1/get_fire_info')
 def get_fire_info():
     return jsonify(get_current_fires())
+
+@app.route('/api/v1/get_single_info')
+def get_single_info():
+    return jsonify(get_fire_summary(request.args["geo_id"]))
 
 @app.route("/<path:filename>")
 def serve_others(filename):
