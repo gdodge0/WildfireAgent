@@ -1,12 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import App from '@/App.vue';
+import DetailPage from "@/DetailPage.vue";
+import DashboardPage from "@/DashboardPage.vue";
 
 const routes = [
   {
     path: '/',
-    name: "Index",
-    component: App
+    name: "Dashboard",
+    component: DashboardPage
   },
+  {
+    path: '/detail',
+    name: "Detail",
+    component: DetailPage
+  }
 ];
 
 const router = createRouter({

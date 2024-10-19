@@ -1,9 +1,10 @@
 <script setup>
+import Detail from "@/components/Detail.vue";
 </script>
 
 <template>
   <main>
-    <router-view />
+    <Detail />
   </main>
 </template>
 
