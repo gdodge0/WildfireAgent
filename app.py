@@ -4,13 +4,12 @@ import logging
 import multiprocessing
 import time
 import platform
-import os
-from sqlite3 import SQLITE_ERROR
 
 import httpx
-from sqlalchemy.testing.suite import ExceptionTest
+from pyasn1.type.error import ValueConstraintError
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify, request
+from models.models import ChatSession, db
 
 from deepgram import (
     DeepgramClient,
@@ -31,17 +30,22 @@ from api.watchduty import get_fire_summary, get_current_fires
 load_dotenv()
 
 SYSTEM_INSTRUCTIONS = open('prompt.txt', 'r').read()
+
+genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
+model = genai.GenerativeModel("gemini-1.5-flash",
+                              system_instruction=SYSTEM_INSTRUCTIONS)
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
 app = Flask(__name__, static_folder="./public", static_url_path="/public")
+app.config.from_object(Config)
+db.init_app(app)
 
 def hello(websocket):
     # Connect to Deepgram
     connected = False
     deepgram = DeepgramClient()
     dg_connection = deepgram.speak.websocket.v("1")
-
-    genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
-    model = genai.GenerativeModel("gemini-1.5-flash",
-                                  system_instruction=SYSTEM_INSTRUCTIONS)
 
     global last_time
     last_time = time.time() - 5
@@ -132,38 +136,44 @@ def hello(websocket):
             data = json.loads(message)
 
             media = data.get("media")
-            geo_id = data.get("fire_id")
+            text = data.get("text")
+            session_id = data.get("session_id")
             voice_model = "aura-asteria-en"
 
-            split_media = media.split(',')
+            with app.app_context():
+                chat_session = ChatSession.query.filter_by(id=session_id).one()
 
-            media_file = base64.b64decode(split_media[-1])
+            if chat_session is None:
+                continue
 
-            # Transcription
+            if media:
+                split_media = media.split(',')
+                media_file = base64.b64decode(split_media[-1])
+                # Transcription
+                payload: FileSource = {
+                    "buffer": media_file,
+                }
 
-            payload: FileSource = {
-                "buffer": media_file,
-            }
+                options: PrerecordedOptions = PrerecordedOptions(
+                    model="nova-2",
+                    smart_format=True,
+                    utterances=True,
+                    punctuate=True,
+                    diarize=True,
+                )
 
-            options: PrerecordedOptions = PrerecordedOptions(
-                model="nova-2",
-                smart_format=True,
-                utterances=True,
-                punctuate=True,
-                diarize=True,
-            )
+                response = deepgram.listen.rest.v("1").transcribe_file(
+                    payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
+                )
 
-            response = deepgram.listen.rest.v("1").transcribe_file(
-                payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
-            )
-
-            print(response)
-
-            utterances = response["results"]["utterances"]
-            if len(utterances) == 0:
-                text = "<No Text Provided>"
+                utterances = response["results"]["utterances"]
+                if len(utterances) == 0:
+                    text = "<No Text Provided>"
+                else:
+                    text = utterances[0]["transcript"]
             else:
-                text = utterances[0]["transcript"]
+                if text is None:
+                    raise Exception("text and media cannot be blank")
 
             # Are we connected to the Deepgram TTS WS?
             if connected is False:
@@ -181,24 +191,87 @@ def hello(websocket):
                     raise Exception("Unable to start Deepgram TTS WebSocket connection")
                 connected = True
 
-            chat = model.start_chat()
+            current_question = {
+                "msg_id": chat_session.msg_count,
+                "type": "user",
+                "description": "a message from a user.",
+                "data": text
+            }
+
             try:
-                app.logger.debug("Providing agent with context")
-                ctx_response = chat.send_message(str(get_fire_summary(geo_id)))
-                for chunk in ctx_response:
-                    pass
+                llm_prompt = f"""
+                You are in a chat session.
+                
+                Previous messages: {chat_session.chat_ctx}
+                
+                Current Question: {current_question}
+                
+                Important information may be contained in the previous messages.
+                Respond to the user's question to the best of your abilities.
+                """
+
                 app.logger.debug("Asking user question.")
-                response = chat.send_message(text)
+                response = model.generate_content(llm_prompt)
+
+                model_text = ""
                 for chunk in response:
                     llm_output = chunk.text
+                    model_text += chunk.text
 
                     dg_connection.send_text(llm_output)
 
+                websocket.send(json.dumps({
+                    "user_message_transcribed": text,
+                    "ai_response": model_text
+                }))
+                with app.app_context():
+                    new_chat_ctx = json.loads(chat_session.chat_ctx)
+
+                    new_chat_ctx.append(current_question)
+                    new_chat_ctx.append({
+                        "msg_id": chat_session.msg_count,
+                        "type": "language_model_response",
+                        "description": "your response to the user's question",
+                        "data": model_text
+                    })
+
+                    chat_session.chat_ctx = json.dumps(new_chat_ctx)
+                    chat_session.msg_count += 2
+                    db.session.add(chat_session)
+                    db.session.commit()
+
+                    print(chat_session.chat_ctx)
+
                 dg_connection.flush()
-            except Exception as e:
+            except ValueConstraintError as e:
                 print(f"llm excetion: {e}")
-    except Exception as e:
+    except ValueConstraintError as e:
         dg_connection.finish()
+
+@app.route('/api/v1/start_chat_session')
+def start_LLM_session():
+    geo_id = request.args["geo_id"]
+
+    app.logger.debug("creating session")
+    summary = get_fire_summary(geo_id)
+
+    messages = [
+        {
+            "msg_id": 0,
+            "type": "system_message",
+            "description": "important context for this chat session",
+            "data" : summary
+        }
+    ]
+
+    chat_session = ChatSession(json.dumps(messages))
+    db.session.add(chat_session)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "session_id": chat_session.id,
+    })
 
 
 @app.route('/api/v1/get_fire_info')
