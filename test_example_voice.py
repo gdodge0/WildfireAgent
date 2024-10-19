@@ -9,7 +9,6 @@ import queue
 import sys
 
 VOICE_AGENT_URL = "wss://agent.deepgram.com/agent"
-#PROMPT = "You are a helpful assistant. Responses should be short and direct."
 PROMPT = open("prompt.txt", "r").read()
 
 VOICE = "aura-asteria-en"
