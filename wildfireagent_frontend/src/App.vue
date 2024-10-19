@@ -1,6 +1,7 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import FireItem from "@/components/FireItem.vue";
 </script>
 
 <template>
@@ -13,7 +14,9 @@ import TheWelcome from './components/TheWelcome.vue'
   </header>
 
   <main>
-    <TheWelcome />
+    <div class="bg-neutral-900 p-4">
+      <FireItem id="1" news="The fire has spread throughout the city" proximity="13mi" size="10k acres" containment="0%" location="San Bernandino" name="Line fire" />
+    </div>
   </main>
 </template>
 
