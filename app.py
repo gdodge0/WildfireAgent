@@ -4,12 +4,9 @@ import logging
 import multiprocessing
 import time
 import platform
-import os
-from sqlite3 import SQLITE_ERROR
 
 import httpx
 from pyasn1.type.error import ValueConstraintError
-from sqlalchemy.testing.suite import ExceptionTest
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify, request
 from models.models import ChatSession, db
