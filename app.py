@@ -5,7 +5,6 @@ import multiprocessing
 import time
 import platform
 import os
-from flask_cors import CORS
 
 import httpx
 from sqlalchemy.testing.suite import ExceptionTest
