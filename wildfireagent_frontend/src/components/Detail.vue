@@ -2,12 +2,37 @@
 import GoogleMap from "@/components/GoogleMap.vue";
 import Chat from "@/components/Chat.vue";
 
-defineProps({
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const props = defineProps({
   id: {
     type: String,
     required: true
   },
 })
+
+const fireSummary = ref(null);
+const error = ref(null);
+
+// Function to fetch the fire summary
+const fetchFireSummary = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/v1/get_single_info', {
+      params: {
+        geo_id: props.id,
+      },
+    });
+    fireSummary.value = response.data; // Store the data in fireSummary
+z  } catch (err) {
+    error.value = 'Failed to fetch fire information';
+  }
+};
+
+// Fetch the data when the component is mounted
+onMounted(() => {
+  fetchFireSummary();
+});
 </script>
 
 <template>
