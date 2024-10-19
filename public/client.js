@@ -1,3 +1,64 @@
+function getBase64(file) {
+   var reader = new FileReader();
+   reader.readAsDataURL(file);
+   reader.onload = function () {
+       window.MediaFileB64 = reader.result;
+   };
+   reader.onerror = function (error) {
+     console.log('Error: ', error);
+   };
+}
+
+
+function getLocalStream() {
+  navigator.mediaDevices
+    .getUserMedia({ video: false, audio: true })
+    .then((stream) => {
+      window.localStream = stream;
+    })
+    .catch((err) => {
+      console.error(`you got an error: ${err}`);
+    });
+}
+
+function toggle_recording() {
+    let btn = document.getElementById("record-audio")
+    if (window.recordedData){
+        btn.className = "button-icon fa-solid fa-play"
+        endRecording();
+    } else {
+        btn.className = "button-icon fa-solid fa-circle-notch"
+        startRecording();
+    }
+}
+
+function startRecording(){
+    window.recordedData = [];
+    window.mediaRecorder = new MediaRecorder(window.localStream,{mimeType: "audio/mp4"});
+    window.mediaRecorder.ondataavailable = (event) => {
+        window.recordedData.push(event.data);
+    }
+    window.mediaRecorder.onstop = (event) => {
+        const blob = new Blob(window.recordedData, { type: "audio/mp4" });
+        window.MediaFile = new File([blob], "recorded.mp4", {type: "audio/mp4"});
+        window.recordedData=null;
+        window.mediaRecorder = null;
+        getBase64(window.MediaFile);
+    }
+
+    window.mediaRecorder.start();
+}
+
+function endRecording(){
+    window.mediaRecorder.stop();
+}
+
+window.onload = function(){
+    getLocalStream();
+}
+
+
+
 const PLAY_STATES = {
     NO_AUDIO: "no_audio",
     LOADING: "loading",
@@ -6,7 +67,6 @@ const PLAY_STATES = {
 
 let playState = PLAY_STATES.NO_AUDIO;
 let audioPlayer;
-const textArea = document.getElementById("text-input");
 const errorMessage = document.querySelector("#error-message");
 let audioChunks = []; // Array to buffer incoming audio data chunks
 let socket;
@@ -59,18 +119,11 @@ function playButtonClick() {
     }
 }
 
-// Remove error message when the text area has a value
-textArea.addEventListener("input", () => {
-    errorMessage.innerHTML = "";
-});
-
 // Function to send data to backend via WebSocket
 function sendData() {
     const modelSelect = document.getElementById("models");
-    const selectedModel = modelSelect.options[modelSelect.selectedIndex].value;
-    const textInput = document.getElementById("text-input").value;
     const fireID = document.getElementById('fire-id').value;
-    if (!textInput) {
+    if (!window.MediaFileB64) {
         errorMessage.innerHTML = "ERROR: Please add text!";
     } else {
         playState = PLAY_STATES.LOADING;
@@ -87,7 +140,7 @@ function sendData() {
 
             socket.addEventListener("open", () => {
                 const data = {
-                    text: textInput,
+                    media: window.MediaFileB64,
                     fire_id: fireID
                 };
                 socket.send(JSON.stringify(data));
@@ -139,7 +192,6 @@ function sendData() {
                                         audioChunks = [];
                                         playState = PLAY_STATES.NO_AUDIO;
                                         updatePlayButton();
-                                        textArea.value = "";
                                     };
                                 });
                             };
@@ -176,7 +228,7 @@ function sendData() {
             });
         } else {
             const data = {
-                text: textInput,
+                text: "",
             };
             socket.send(JSON.stringify(data));
         }
