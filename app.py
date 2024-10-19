@@ -5,6 +5,10 @@ import multiprocessing
 import time
 import platform
 
+import os
+from flask_cors import CORS, cross_origin
+
+
 import httpx
 from pyasn1.type.error import ValueConstraintError
 from websockets.sync.server import serve
@@ -38,8 +42,12 @@ model = genai.GenerativeModel("gemini-1.5-flash",
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
 app = Flask(__name__, static_folder="./public", static_url_path="/public")
+
 app.config.from_object(Config)
 db.init_app(app)
+
+CORS(app)
+
 
 def hello(websocket):
     # Connect to Deepgram
@@ -279,6 +287,7 @@ def get_fire_info():
     return jsonify(get_current_fires())
 
 @app.route('/api/v1/get_single_info')
+@cross_origin()
 def get_single_info():
     return jsonify(get_fire_summary(request.args["geo_id"]))
 
