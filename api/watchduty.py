@@ -24,28 +24,46 @@ class Fire:
 
         return r.json()
 
+    def get_geo_data(self):
+        r = requests.get(f'https://cache.watchduty.org/api/v1/geo_events/{self.geo_id}')
+        if r.status_code != 200:
+            return {}
+
+        return r.json()
+
     def return_summary(self):
         summary = {
             "description": "An update to date summary of wildfire information from Watch Duty. This is context for your chat session.",
-            "messages": []
+            "messages": {
+                "summary": [],
+                "geo_events": []
+            }
         }
 
         data = self.get_reporter_information()
+        geo_data = self.get_geo_data()
 
         if not data:
-            summary["messages"].append({
+            summary["messages"]["summary"].append({
                 "no current data"
             })
+        else:
+            for result in data["results"]:
+                try:
+                    author = result["user_created"]["display_name"]
+                except TypeError:
+                    author = "staff"
+                summary["messages"]["summary"].append({
+                    "author": author,
+                    "timestamp": result["date_created"],
+                    "message": result["message"]
+                })
 
-        for result in data["results"]:
-            try:
-                author = result["user_created"]["display_name"]
-            except TypeError:
-                author = "staff"
-            summary["messages"].append({
-                "author": author,
-                "timestamp": result["date_created"],
-                "message": result["message"]
+        if not geo_data:
+            summary["messages"]["geo_events"].append({
+                "no current data"
             })
+        else:
+            summary["messages"]["geo_events"].append(geo_data)
 
         return summary
