@@ -203,7 +203,6 @@ def hello(websocket):
 
 
 @app.route('/api/v1/get_fire_info')
-@cross_origin()
 def get_fire_info():
     return jsonify(get_current_fires())
 
