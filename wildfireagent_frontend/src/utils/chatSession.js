@@ -109,11 +109,12 @@ class ChatbotWebSocket {
       };
       reader.readAsArrayBuffer(blob);
 
-      this.audioChunks = []; // Clear the audio chunks after playback
+       // Clear the audio chunks after playback
 
     } else {
       console.log('Audio will not be played because the mic is not active.');
     }
+    this.audioChunks = [];
   }
 
   stopAudio() {

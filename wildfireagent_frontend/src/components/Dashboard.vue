@@ -93,7 +93,7 @@ const watchingItems = ref([
         />
     </div>
     <div class="flex-grow grid grid-rows-3 justify-stretch items-stretch gap-y-4 min-h-0">
-      <div class="flex flex-col justify-start gap-y-4 items-stretch row-span-2 relative">
+      <div class="flex flex-col justify-start gap-y-4 items-stretch row-span-3 relative">
         <span class="text-gray-300">
           <template v-if="show_nearby">
             Nearby:
@@ -118,7 +118,7 @@ const watchingItems = ref([
         </div>
 
       </div>
-      <div class="flex flex-col justify-start gap-y-4 items-stretch">
+      <div class="hidden flex-col justify-start gap-y-4 items-stretch">
         <span class="text-gray-300">Watching:</span>
         <div class="flex flex-col justify-start gap-y-4 items-stretch overflow-y-auto">
           <WatchingItem
