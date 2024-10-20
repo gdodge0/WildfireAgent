@@ -27,6 +27,7 @@ async function refreshHeadlines(){
   news.forEach((headline) => {
     const fire = fireItems.value.find(fire => String(fire.id) === String(headline["id"]));
     fire.news = headline["headline"]
+    fire.news_timestamp = headline["time"]
   })
 
 
@@ -107,6 +108,7 @@ const watchingItems = ref([
             :key="index"
             :id="fire.id"
             :news="fire.news"
+            :news_timestamp="fire.news_timestamp"
             :proximity="fire.proximity"
             :size="fire.data.acreage"
             :containment="fire.data.containment"

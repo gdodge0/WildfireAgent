@@ -6,6 +6,7 @@ import multiprocessing
 import time
 import platform
 from flask_cors import CORS, cross_origin
+from helpers import *
 
 
 import httpx
@@ -326,7 +327,7 @@ def get_latest_news_batch():
         news_data.append({
             "id": fire_id,
             "headline": summary["messages"]["summary"][0]["message"],
-            "time": summary["messages"]["summary"][0]["timestamp"]
+            "time": pretty_date_time(summary["messages"]["summary"][0]["timestamp"])
         })
 
     return jsonify(news_data), 200
