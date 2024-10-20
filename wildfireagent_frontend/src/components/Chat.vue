@@ -184,13 +184,13 @@ onBeforeUnmount(() => {
     </div>
     <div class="flex flex-row justify-between items-center bg-transparent gap-x-4 max-w-full overflow-hidden min-h-[42px]">
       <div class="flex-grow flex flex-row justify-between items-center gap-x-2 bg-transparent border border-white text-white max-w-full rounded-full px-6 overflow-hidden">
-        <div class="flex-grow overflow-hidden py-2">
+        <div class="flex-grow flex overflow-hidden py-2">
           <input
             type="text"
             placeholder="Type your message..."
             v-model="userInput"
             @keydown.enter="handleInputSubmit"
-            class=" bg-transparent focus:outline-none"/>
+            class="w-full bg-transparent focus:outline-none"/>
         </div>
         <button @click="handleInputSubmit" class="bg-transparent active:bg-white text-white active:text-black transition-all rounded-full p-2">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
