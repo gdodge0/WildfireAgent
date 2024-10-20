@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 import logging
 import multiprocessing
@@ -210,6 +211,8 @@ def hello(websocket):
                 Previous messages: {chat_session.chat_ctx}
                 
                 Current Question: {current_question}
+                
+                Current Time: {str(datetime.datetime.now())}
                 
                 Important information may be contained in the previous messages.
                 Respond to the user's question to the best of your abilities.
