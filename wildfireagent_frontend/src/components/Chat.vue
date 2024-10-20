@@ -1,6 +1,7 @@
 <script setup>
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import ChatbotWebSocket from '../utils/chatSession.js'; // Assuming the WebSocket class is in the same folder
+import { marked } from "marked";
 
 const props = defineProps({
   id: {
@@ -105,7 +106,7 @@ const handleBotResponse = (response) => {
   // Add bot's response to the chat log
   chatMessages.value.push({
     sender: 'bot',
-    text: response,
+    text: marked(response),
   });
   scrollToBottom();
   isButtonDisabled.value = false; // Re-enable the button after AI finishes talking
@@ -174,12 +175,10 @@ onBeforeUnmount(() => {
   <div class="relative max-h-full h-full max-w-full w-full flex flex-col bg-transparent text-white justify-between items-stretch">
     <div ref="chatContainer" class="overflow-y-auto bg-transparent min-h-0">
       <div  v-for="(message, index) in chatMessages" :key="index" class="mb-4">
-        <p v-if="message.sender === 'bot'" class="bg-gray-800 p-2 rounded-lg">
-          {{ message.text }}
-        </p>
-        <p v-if="message.sender === 'user'" class="bg-gray-600 p-2 rounded-lg self-end">
-          {{ message.text }}
-        </p>
+        <div v-if="message.sender === 'bot'" class="bg-gray-800 p-2 rounded-lg" v-html="message.text">
+        </div>
+        <div v-if="message.sender === 'user'" class="bg-gray-600 p-2 rounded-lg self-end" v-html="message.text">
+        </div>
       </div>
     </div>
     <div class="flex flex-row justify-between items-center bg-transparent gap-x-4 max-w-full overflow-hidden min-h-[42px]">
