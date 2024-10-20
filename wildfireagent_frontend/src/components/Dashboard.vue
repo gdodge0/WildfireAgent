@@ -1,32 +1,41 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import FireItem from "@/components/FireItem.vue";
 import WatchingItem from "@/components/WatchingItem.vue";
+import {fetchFireItems, fetchBatchLatestNews} from "@/utils/api.js";
+import getNClosestLocations from "@/utils/location.js";
+import promptUserLocation from "@/utils/browser.js";
 
-const fireItems = ref([
-  { id: '33389', news: "The fire has spread throughout the city", proximity: "13mi", size: "10k acres", containment: "0%", location: "San Bernandino", name: "Line fire" },
-  { id: '33389', news: "Fire near forest area", proximity: "20mi", size: "2k acres", containment: "30%", location: "Angeles National Forest", name: "Forest Fire" }
-]);
+let totalFires = [];
+let fireItems = ref([]);
+const error = ref(null);
+
+// this is called when promptUserLocation successfully returns
+async function gatherNearbyFires(userLocation) {
+  let locations = getNClosestLocations(totalFires, userLocation)
+  locations.forEach((fire) => {
+    fireItems.value.push(fire)
+  })
+
+  const news = await fetchBatchLatestNews(locations)
+  console.log(news)
+  news.forEach((headline) => {
+    const fire = fireItems.value.find(fire => String(fire.id) === String(headline["id"]));
+    fire.news = headline["headline"]
+  })
+}
+
+// Fetch the data when the component is mounted
+onMounted(async () => {
+  totalFires = await fetchFireItems();
+  promptUserLocation(gatherNearbyFires);
+});
 
 // Watching Items state
 const watchingItems = ref([
   { id: `33389`, name: "Line Fire", bg: "bg-red-500" },
   { id: `33389`, name: "Airport Fire", bg: "bg-green-500" }
 ]);
-
-// Function to add a new Fire Item
-const addFireItem = () => {
-  const newFireItem = {
-    id: `33389`,
-    news: "New fire reported in the area",
-    proximity: "5mi",
-    size: "500 acres",
-    containment: "10%",
-    location: "Los Angeles",
-    name: "LA Fire"
-  };
-  fireItems.value.push(newFireItem);
-};
 
 // Function to add a new Watching Item
 const addWatchingItem = () => {
@@ -40,6 +49,7 @@ const addWatchingItem = () => {
 </script>
 
 <template>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=location_on" />
   <div class="max-w-screen w-screen max-h-screen h-screen bg-neutral-900 p-4 flex flex-col justify-start items-stretch gap-y-4 overflow-hidden">
     <div class="border border-white text-white px-6 py-2 rounded-full text-xl">
         <input type="text" placeholder="Search..." class="bg-transparent outline-0 focus-visible:outline-none caret-white ">
@@ -54,9 +64,9 @@ const addWatchingItem = () => {
             :id="fire.id"
             :news="fire.news"
             :proximity="fire.proximity"
-            :size="fire.size"
-            :containment="fire.containment"
-            :location="fire.location"
+            :size="fire.data.acreage"
+            :containment="fire.data.containment"
+            :location="fire.address"
             :name="fire.name"
           />
         </div>
