@@ -253,6 +253,7 @@ def hello(websocket):
     except ValueError as e:
         dg_connection.finish()
 
+@cross_origin()
 @app.route('/api/v1/start_chat_session')
 def start_LLM_session():
     geo_id = request.args["geo_id"]

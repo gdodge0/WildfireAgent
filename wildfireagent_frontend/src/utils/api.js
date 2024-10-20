@@ -2,7 +2,7 @@ import axios from "axios"
 
 export async function fetchFireItems(){
   try {
-    const response = await axios.get('http://localhost:5000/api/v1/get_fire_info')
+    const response = await axios.get('http://127.0.0.1:5000/api/v1/get_fire_info')
     return response.data
   } catch (err) {
       console.log(err)
@@ -17,7 +17,7 @@ export async function fetchBatchLatestNews(fires) {
       })
     try {
     const response =
-        await axios.get('http://localhost:5000/api/v1/get_latest_news_batch', {
+        await axios.get('http://127.0.0.1:5000/api/v1/get_latest_news_batch', {
             params: {
                 fire_ids: fire_ids // fire_ids should be an array like [36560, 36643, 36623]
             },
