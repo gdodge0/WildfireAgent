@@ -1,7 +1,7 @@
 import requests
 
 def get_current_fires():
-    r = requests.get('https://api.watchduty.org/api/v1/geo_events/?is_relevant=true&zyx=5,12,5&geo_event_types=*')
+    r = requests.get('https://api.watchduty.org/api/v1/geo_events/?is_relevant=true&zyx=5,12,5&geo_event_types=wildfire')
     if r.status_code != 200:
         return []
 
