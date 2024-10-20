@@ -27,11 +27,14 @@ const chatContainer = ref(null);
 const recordedChunks = ref([]); // Store audio data
 const isLoading = ref(false);
 const isTalking = ref(false);
+const userInput = ref('');
 let ws; // WebSocket instance
 
 // Toggle microphone state
 const toggleMic = () => {
   isMicActive.value = !isMicActive.value;
+  isLoading.value = false;
+  isTalking.value = false;
   if (!isMicActive.value && ws) {
     ws.stopAudio(); // Stop the audio if the mic is toggled off
   }
@@ -181,7 +184,7 @@ onBeforeUnmount(() => {
     </div>
     <div class="flex flex-row justify-between items-center bg-transparent gap-x-4 max-w-full overflow-hidden min-h-[42px]">
       <div class="flex-grow flex flex-row justify-between items-center gap-x-2 bg-transparent border border-white text-white max-w-full rounded-full px-6 overflow-hidden">
-        <div class="overflow-hidden py-2">
+        <div class="flex-grow overflow-hidden py-2">
           <input
             type="text"
             placeholder="Type your message..."
