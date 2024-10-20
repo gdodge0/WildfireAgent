@@ -65,7 +65,7 @@ const handleBotResponse = (response) => {
 
 // Initialize WebSocket connection when component mounts
 onMounted(() => {
-  ws = new ChatbotWebSocket(props.session_id, 'ws://127.0.0.1:3000');
+  ws = new ChatbotWebSocket(props.session_id, 'ws://localhost:3000');
   ws.connect()
     .then(() => {
       console.log('WebSocket connected');
