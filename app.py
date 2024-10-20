@@ -4,8 +4,6 @@ import logging
 import multiprocessing
 import time
 import platform
-
-import os
 from flask_cors import CORS, cross_origin
 
 
@@ -35,7 +33,7 @@ load_dotenv()
 SYSTEM_INSTRUCTIONS = open('prompt.txt', 'r').read()
 
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
-model = genai.GenerativeModel("gemini-1.5-flash",
+model = genai.GenerativeModel("gemini-1.5-pro",
                               system_instruction=SYSTEM_INSTRUCTIONS)
 
 class Config:
@@ -236,7 +234,7 @@ def hello(websocket):
 
                     new_chat_ctx.append(current_question)
                     new_chat_ctx.append({
-                        "msg_id": chat_session.msg_count,
+                        "msg_id": chat_session.msg_count+1,
                         "type": "language_model_response",
                         "description": "your response to the user's question",
                         "data": model_text
@@ -280,6 +278,20 @@ def start_LLM_session():
         "session_id": chat_session.id,
         "event_data": summary["messages"]["geo_events"][0]
     })
+
+@app.route('/api/v1/get_msg_history')
+def msg_history():
+    session_id = request.args["session_id"]
+    session = ChatSession.query.filter_by(id=session_id).one()
+
+    messages = []
+    for message in json.loads(session.chat_ctx):
+        if message["msg_id"] == 0:
+            continue
+
+        messages.append(message)
+
+    return jsonify(messages)
 
 
 @app.route('/api/v1/get_fire_info')
