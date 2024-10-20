@@ -17,7 +17,6 @@ const props = defineProps({
 })
 
 
-
 const chatMessages = ref([{sender: 'bot', text: `Hello, what would you like to know about the ${props.name}?`,}]);
 const chatContainer = ref(null);
 
