@@ -1,5 +1,4 @@
 import base64
-import datetime
 import json
 import logging
 import multiprocessing
@@ -10,6 +9,7 @@ from helpers import *
 
 
 import httpx
+from datetime import datetime
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify, request
 from models.models import ChatSession, db
@@ -213,7 +213,7 @@ def hello(websocket):
                 
                 Current Question: {current_question}
                 
-                Current Time: {str(datetime.datetime.now())}
+                Current Time: {str(datetime.now())}
                 
                 Important information may be contained in the previous messages.
                 Respond to the user's question to the best of your abilities.
