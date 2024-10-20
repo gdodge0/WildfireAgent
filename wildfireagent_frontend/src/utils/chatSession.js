@@ -1,10 +1,16 @@
 class ChatbotWebSocket {
-  constructor(sessionId, baseUrl) {
+  constructor(sessionId, baseUrl, isMicActiveRef, isTalkingRef, isLoadingRef) {
     this.sessionId = sessionId;
     this.baseUrl = baseUrl;
+    this.isMicActiveRef = isMicActiveRef;
+    this.isTalkingRef = isTalkingRef;
+    this.isLoadingRef = isLoadingRef;
+
+
     this.socket = null;
     this.playState = 'no_audio';
     this.audioChunks = [];
+    this.audioSource = null;
   }
 
   connect() {
@@ -36,6 +42,8 @@ class ChatbotWebSocket {
   handleMessage(event) {
     if (typeof event.data === 'string') {
       let msg = JSON.parse(event.data);
+      console.log(msg)
+
       if (msg.type === 'Flushed') {
         console.log('Flushed received');
         this.playAudio();
@@ -61,25 +69,60 @@ class ChatbotWebSocket {
     };
     this.socket.send(JSON.stringify(data));
   }
-
   playAudio() {
-      console.log(this.audioChunks);
-    const blob = new Blob(this.audioChunks, { type: 'audio/wav' });
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const reader = new FileReader();
+    this.isLoadingRef.value = false;
+    // Only play the audio if the mic is active (isMicActiveRef is true)
+    if (this.isMicActiveRef.value) {
+      const blob = new Blob(this.audioChunks, { type: 'audio/wav' });
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const reader = new FileReader();
+      this.isTalkingRef.value = true;
+      reader.onload = () => {
+        audioContext.decodeAudioData(reader.result).then((buffer) => {
+          if (!this.isMicActiveRef.value) {
+            return; // Do not play if the mic is toggled off before the audio starts
+          }
 
-    reader.onload = function () {
-        const arrayBuffer = this.result;
-      audioContext.decodeAudioData(arrayBuffer, (buffer) => {
-        const source = audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioContext.destination);
-        source.start();
-      });
-    };
-    reader.readAsArrayBuffer(blob);
+          this.audioSource = audioContext.createBufferSource();
+          this.audioSource.buffer = buffer;
+          this.audioSource.connect(audioContext.destination);
 
-    this.audioChunks = []; // Clear audio chunks after playing
+          // Ensure the context is resumed if suspended
+          if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+              this.audioSource.start();
+            });
+          } else {
+            this.audioSource.start();
+          }
+
+          this.playState = 'playing';
+
+          // Stop the audio if the mic is toggled off mid-playback
+          this.audioSource.onended = () => {
+            if (this.isMicActiveRef.value) {
+              this.playState = 'no_audio';
+              this.isTalkingRef.value = false;
+            }
+          };
+        });
+      };
+      reader.readAsArrayBuffer(blob);
+
+      this.audioChunks = []; // Clear the audio chunks after playback
+
+    } else {
+      console.log('Audio will not be played because the mic is not active.');
+    }
+  }
+
+  stopAudio() {
+    // Stop the audio playback if the mic is toggled off early
+    if (this.audioSource) {
+      this.audioSource.stop();
+      this.audioSource = null;
+      this.playState = 'no_audio';
+    }
   }
 
   close() {

@@ -58,7 +58,7 @@ defineProps({
     <div class="flex flex-row justify-between items-center gap-x-4">
       <div class="flex flex-col justify-start">
         <span>Latest Info:</span>
-        <p>{{ news }}</p>
+        <p class="line-clamp-3 ">{{ news }}</p>
       </div>
     </div>
   </div>
