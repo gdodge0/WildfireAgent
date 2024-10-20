@@ -14,13 +14,22 @@ let fireItems = ref([]);
 let show_nearby = true
 let closest_3_fires = []
 const error = ref(null);
+let headline_debounce_timout;
+
+function debounceRefreshHeadlines() {
+    clearTimeout(headline_debounce_timout);
+    headline_debounce_timout = setTimeout(() => refreshHeadlines(), 1000); // 300ms debounce
+}
 
 async function refreshHeadlines(){
+  console.log("getting headlines")
   const news = await fetchBatchLatestNews(fireItems.value)
   news.forEach((headline) => {
     const fire = fireItems.value.find(fire => String(fire.id) === String(headline["id"]));
     fire.news = headline["headline"]
   })
+
+
 }
 
 // this is called when promptUserLocation successfully returns
@@ -29,7 +38,7 @@ async function gatherNearbyFires(userLocation) {
   closest_3_fires.forEach((fire) => {
     fireItems.value.push(fire)
   })
-  await refreshHeadlines()
+  refreshHeadlines()
 }
 
 function performSearch() {
@@ -53,7 +62,7 @@ function performSearch() {
     })
   }
 
-  refreshHeadlines()
+  debounceRefreshHeadlines()
 }
 
 // Fetch the data when the component is mounted

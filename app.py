@@ -315,7 +315,11 @@ def get_latest_news_batch():
     news_data = []
     for fire_id in fire_ids:
         summary = get_fire_summary(fire_id)
-        news_data.append({"id": fire_id, "headline": summary["messages"]["summary"][0]["message"]})
+        news_data.append({
+            "id": fire_id,
+            "headline": summary["messages"]["summary"][0]["message"],
+            "time": summary["messages"]["summary"][0]["timestamp"]
+        })
 
     return jsonify(news_data), 200
 
