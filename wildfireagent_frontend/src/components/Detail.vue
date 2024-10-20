@@ -12,21 +12,24 @@ const props = defineProps({
   },
 })
 
-const fireSummary = ref(null);
-const error = ref(null);
-
+let session_id = ref(null);
+const fire_name = ref(null);
+let fireCoords = ref([]);
 // Function to fetch the fire summary
 const fetchFireSummary = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/v1/get_single_info', {
+    const response = await axios.get('http://127.0.0.1:5000/api/v1/start_chat_session', {
       params: {
         geo_id: props.id,
       },
     });
-    fireSummary.value = response.data;
+    fire_name.value = response.data.event_data.name;
+    session_id.value = response.data.session_id;
+    fireCoords.value.push({ lat: response.data.event_data.lat, lng: response.data.event_data.lng});
+
     console.log(response.data)
   } catch (err) {
-    error.value = 'Failed to fetch fire information';
+    console.log(err);
   }
 };
 
@@ -44,7 +47,7 @@ onMounted(() => {
           <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
         </svg>
       </router-link>
-      <h2 class="text-white text-lg font-bold">Line Fire {{ id }}</h2>
+      <h2 class="text-white text-lg font-bold" >{{ fire_name }}</h2>
       <button class="p-2 rounded-full bg-transparent text-white active:bg-white active:text-black transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" class="max-h-10 h-8" viewBox="0 -960 960 960" fill="currentColor">
           <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
@@ -53,10 +56,10 @@ onMounted(() => {
     </div>
     <div class="flex-grow grid grid-rows-3 justify-stretch items-stretch min-h-0 ">
       <div class="w-screen">
-        <GoogleMap />
+        <GoogleMap :fireCoordinates="fireCoords"/>
       </div>
       <div class="w-screen row-span-2 p-4">
-        <Chat :id="id"/>
+        <Chat v-if="session_id" :id="props.id" :name="fire_name" :session_id="session_id" />
       </div>
     </div>
   </div>

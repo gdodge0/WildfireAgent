@@ -5,9 +5,11 @@ import multiprocessing
 import time
 import platform
 from flask_cors import CORS, cross_origin
+from helpers import *
 
 
 import httpx
+from datetime import datetime
 from websockets.sync.server import serve
 from flask import Flask, send_from_directory, jsonify, request
 from models.models import ChatSession, db
@@ -211,6 +213,8 @@ def hello(websocket):
                 
                 Current Question: {current_question}
                 
+                Current Time: {str(datetime.now())}
+                
                 Important information may be contained in the previous messages.
                 Respond to the user's question to the best of your abilities.
                 """
@@ -225,10 +229,15 @@ def hello(websocket):
 
                     dg_connection.send_text(llm_output)
 
-                websocket.send(json.dumps({
-                    "user_message_transcribed": text,
-                    "ai_response": model_text
-                }))
+                if media:
+                    websocket.send(json.dumps({
+                        "user_message_transcribed": text,
+                        "ai_response": model_text
+                    }))
+                else:
+                    websocket.send(json.dumps({
+                        "ai_response": model_text
+                    }))
                 with app.app_context():
                     new_chat_ctx = json.loads(chat_session.chat_ctx)
 
@@ -253,6 +262,7 @@ def hello(websocket):
     except ValueError as e:
         dg_connection.finish()
 
+@cross_origin()
 @app.route('/api/v1/start_chat_session')
 def start_LLM_session():
     geo_id = request.args["geo_id"]
@@ -302,6 +312,26 @@ def get_fire_info():
 @cross_origin()
 def get_single_info():
     return jsonify(get_fire_summary(request.args["geo_id"]))
+
+@app.route('/api/v1/get_latest_news_batch', methods=['GET'])
+def get_latest_news_batch():
+    # Get 'fire_ids' from the query string
+    fire_ids = request.args.getlist('fire_ids')
+
+    if not fire_ids:
+        return jsonify({"error": "fire_ids parameter is required"}), 400
+
+    news_data = []
+    for fire_id in fire_ids:
+        summary = get_fire_summary(fire_id)
+        news_data.append({
+            "id": fire_id,
+            "headline": summary["messages"]["summary"][0]["message"],
+            "time": pretty_date_time(summary["messages"]["summary"][0]["timestamp"])
+        })
+
+    return jsonify(news_data), 200
+
 
 @app.route("/<path:filename>")
 def serve_others(filename):
