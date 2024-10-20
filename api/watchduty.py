@@ -1,5 +1,11 @@
 import requests
+from redis import StrictRedis
+from redis_cache import RedisCache
 
+client = StrictRedis(host="localhost", decode_responses=True)
+cache = RedisCache(redis_client=client)
+
+@cache.cache(ttl=(60*15))
 def get_current_fires():
     r = requests.get('https://api.watchduty.org/api/v1/geo_events/?is_relevant=true&zyx=5,12,5&geo_event_types=wildfire')
     if r.status_code != 200:
@@ -7,6 +13,7 @@ def get_current_fires():
 
     return r.json()
 
+@cache.cache(ttl=(60*15))
 def get_fire_summary(geo_id):
     fire = Fire(geo_id)
     return fire.return_summary()
