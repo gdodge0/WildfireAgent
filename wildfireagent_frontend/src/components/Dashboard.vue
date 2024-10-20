@@ -5,24 +5,64 @@ import WatchingItem from "@/components/WatchingItem.vue";
 import {fetchFireItems, fetchBatchLatestNews} from "@/utils/api.js";
 import getNClosestLocations from "@/utils/location.js";
 import promptUserLocation from "@/utils/browser.js";
+import deepSearchObject from "@/utils/search.js";
 
 let totalFires = [];
+let matchingFires = [];
+let searchTerm = ref();
 let fireItems = ref([]);
+let show_nearby = true
+let closest_3_fires = []
 const error = ref(null);
+let headline_debounce_timout;
 
-// this is called when promptUserLocation successfully returns
-async function gatherNearbyFires(userLocation) {
-  let locations = getNClosestLocations(totalFires, userLocation)
-  locations.forEach((fire) => {
-    fireItems.value.push(fire)
-  })
+function debounceRefreshHeadlines() {
+    clearTimeout(headline_debounce_timout);
+    headline_debounce_timout = setTimeout(() => refreshHeadlines(), 1000); // 300ms debounce
+}
 
-  const news = await fetchBatchLatestNews(locations)
-  console.log(news)
+async function refreshHeadlines(){
+  console.log("getting headlines")
+  const news = await fetchBatchLatestNews(fireItems.value)
   news.forEach((headline) => {
     const fire = fireItems.value.find(fire => String(fire.id) === String(headline["id"]));
     fire.news = headline["headline"]
   })
+
+
+}
+
+// this is called when promptUserLocation successfully returns
+async function gatherNearbyFires(userLocation) {
+  closest_3_fires = getNClosestLocations(totalFires, userLocation)
+  closest_3_fires.forEach((fire) => {
+    fireItems.value.push(fire)
+  })
+  refreshHeadlines()
+}
+
+function performSearch() {
+  show_nearby = searchTerm.value === ""
+  const searchTermLower = String(searchTerm.value).toLowerCase();  // Convert search term to lowercase
+
+  // Deep search through all fire objects
+  matchingFires = totalFires.filter(fire => {
+      return deepSearchObject(fire, searchTermLower);
+  });
+
+  fireItems.value = []
+  if (show_nearby)
+  {
+    closest_3_fires.forEach((fire) => {
+      fireItems.value.push(fire)
+    })
+  } else {
+    matchingFires.forEach((fire) => {
+      fireItems.value.push(fire)
+    })
+  }
+
+  debounceRefreshHeadlines()
 }
 
 // Fetch the data when the component is mounted
@@ -36,27 +76,31 @@ const watchingItems = ref([
   { id: `33389`, name: "Line Fire", bg: "bg-red-500" },
   { id: `33685`, name: "Bridge Fire", bg: "bg-green-500" }
 ]);
-
-// Function to add a new Watching Item
-const addWatchingItem = () => {
-  const newWatchingItem = {
-    id: `33389`,
-    name: "New Watch Fire",
-    bg: "bg-blue-500"
-  };
-  watchingItems.value.push(newWatchingItem);
-};
 </script>
 
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=location_on" />
   <div class="max-w-screen w-screen max-h-screen h-screen bg-neutral-900 p-4 flex flex-col justify-start items-stretch gap-y-4 overflow-hidden">
     <div class="border border-white text-white px-6 py-2 rounded-full text-xl">
-        <input type="text" placeholder="Search..." class="bg-transparent outline-0 focus-visible:outline-none caret-white ">
+        <input
+          id="searchbar"
+          type="text"
+          placeholder="Search..."
+          class="bg-transparent outline-0 focus-visible:outline-none caret-white"
+          v-model="searchTerm"
+          @input="performSearch(searchTerm, totalFires)"
+        />
     </div>
     <div class="flex-grow grid grid-rows-3 justify-stretch items-stretch gap-y-4 min-h-0">
       <div class="flex flex-col justify-start gap-y-4 items-stretch row-span-2 relative">
-        <span class="text-gray-300">Nearby:</span>
+        <span class="text-gray-300">
+          <template v-if="show_nearby">
+            Nearby:
+          </template>
+          <template v-else>
+            Found {{ matchingFires.length }} matching fires
+          </template>
+        </span>
         <div class="flex flex-col justify-start gap-y-4 items-stretch overflow-y-auto scroll-fade">
           <FireItem
             v-for="(fire, index) in fireItems"

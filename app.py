@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 import logging
 import multiprocessing
@@ -211,6 +212,8 @@ def hello(websocket):
                 
                 Current Question: {current_question}
                 
+                Current Time: {str(datetime.datetime.now())}
+                
                 Important information may be contained in the previous messages.
                 Respond to the user's question to the best of your abilities.
                 """
@@ -253,6 +256,7 @@ def hello(websocket):
     except ValueError as e:
         dg_connection.finish()
 
+@cross_origin()
 @app.route('/api/v1/start_chat_session')
 def start_LLM_session():
     geo_id = request.args["geo_id"]
@@ -314,7 +318,11 @@ def get_latest_news_batch():
     news_data = []
     for fire_id in fire_ids:
         summary = get_fire_summary(fire_id)
-        news_data.append({"id": fire_id, "headline": summary["messages"]["summary"][0]["message"]})
+        news_data.append({
+            "id": fire_id,
+            "headline": summary["messages"]["summary"][0]["message"],
+            "time": summary["messages"]["summary"][0]["timestamp"]
+        })
 
     return jsonify(news_data), 200
 
