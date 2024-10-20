@@ -59,7 +59,7 @@ onMounted(() => {
         <GoogleMap :fireCoordinates="fireCoords"/>
       </div>
       <div class="w-screen row-span-2 p-4">
-        <Chat :id="id" :name="fire_name" :session_id="session_id"/>
+        <Chat v-if="session_id" :id="props.id" :name="fire_name" :session_id="session_id" />
       </div>
     </div>
   </div>
