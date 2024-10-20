@@ -1,5 +1,6 @@
-`<script setup>
-import { ref, nextTick } from 'vue';
+<script setup>
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import ChatbotWebSocket from '../utils/chatSession.js'; // Assuming the WebSocket class is in the same folder
 
 const props = defineProps({
   id: {
@@ -14,11 +15,14 @@ const props = defineProps({
     type: String,
     required: true
   }
-})
+});
 
-
-const chatMessages = ref([{sender: 'bot', text: `Hello, what would you like to know about the ${props.name}?`,}]);
+const chatMessages = ref([
+  { sender: 'bot', text: `Hello, what would you like to know about the ${props.name}?` }
+]);
 const chatContainer = ref(null);
+const userInput = ref('');
+let ws; // Variable to hold the WebSocket instance
 
 // Function to handle user message input
 const sendMessage = async (userMessage) => {
@@ -26,40 +30,69 @@ const sendMessage = async (userMessage) => {
     // Add user's message to the chat log
     chatMessages.value.push({ sender: 'user', text: userMessage });
 
-    // Simulate a bot response after the user's message
-    setTimeout(() => {
-      botResponse(userMessage);
-    }, 500);
+    // Send the message to the backend via WebSocket
+    if (ws) {
+      ws.sendMessageText(userMessage); // Sending user message to the WebSocket server
+    }
 
     await scrollToBottom();
   }
 };
 
+// Function to scroll to the bottom of the chat container
 const scrollToBottom = async () => {
   await nextTick(); // Ensure DOM updates first
-
   if (chatContainer.value) {
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
   }
 };
 
-// Function to simulate bot response
-const botResponse = async (userMessage) => {
-  // Add bot's response to the chat log
-  chatMessages.value.push({
-    sender: 'bot',
-    text: `You said: "${userMessage}". How else can I help?`,
-  });
-  await scrollToBottom();
-};
-
 // Handle form input
-const userInput = ref('');
 const handleInputSubmit = () => {
   sendMessage(userInput.value);
   userInput.value = ''; // Clear the input after sending
 };
+
+// Function to handle incoming bot response
+const handleBotResponse = (response) => {
+  // Add bot's response to the chat log
+  chatMessages.value.push({
+    sender: 'bot',
+    text: response,
+  });
+  scrollToBottom();
+};
+
+// Initialize WebSocket connection when component mounts
+onMounted(() => {
+  ws = new ChatbotWebSocket(props.session_id, 'ws://localhost:3000');
+  ws.connect()
+    .then(() => {
+      console.log('WebSocket connected');
+    })
+    .catch((err) => {
+      console.error('WebSocket connection error:', err);
+    });
+
+  // Handle WebSocket message events
+  ws.socket.addEventListener('message', (event) => {
+    if (typeof event.data === 'string') {
+      let msg = JSON.parse(event.data);
+      if (msg.type !== 'Flushed') {
+        handleBotResponse(msg.ai_response);
+      }
+    }
+  });
+});
+
+// Clean up WebSocket connection before the component is unmounted
+onBeforeUnmount(() => {
+  if (ws) {
+    ws.close();
+  }
+});
 </script>
+
 <template>
   <div class="max-h-full h-full max-w-full w-full flex flex-col bg-transparent text-white justify-between items-stretch">
     <div ref="chatContainer" class="overflow-y-auto bg-transparent min-h-0">
