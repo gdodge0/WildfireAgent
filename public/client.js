@@ -141,7 +141,7 @@ function sendData() {
             socket.addEventListener("open", () => {
                 const data = {
                     media: window.MediaFileB64,
-                    session_id: "b99eda3b-ab29-45cb-b2a3-c6bb85d1dc8e"
+                    session_id: "abf3ab05-91a0-4cdc-850e-8995a1cc9989"
                 };
                 socket.send(JSON.stringify(data));
             });
