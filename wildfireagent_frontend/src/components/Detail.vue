@@ -12,7 +12,7 @@ const props = defineProps({
   },
 })
 
-let session_id = null;
+let session_id = ref(null);
 const fire_name = ref(null);
 let fireCoords = ref([]);
 // Function to fetch the fire summary
@@ -24,9 +24,8 @@ const fetchFireSummary = async () => {
       },
     });
     fire_name.value = response.data.event_data.name;
-    session_id = response.data.session_id;
+    session_id.value = response.data.session_id;
     fireCoords.value.push({ lat: response.data.event_data.lat, lng: response.data.event_data.lng});
-
 
     console.log(response.data)
   } catch (err) {
@@ -60,7 +59,7 @@ onMounted(() => {
         <GoogleMap :fireCoordinates="fireCoords"/>
       </div>
       <div class="w-screen row-span-2 p-4">
-        <Chat :id="id"/>
+        <Chat :id="id" :name="fire_name" :session_id="session_id"/>
       </div>
     </div>
   </div>
