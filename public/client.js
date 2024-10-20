@@ -167,6 +167,7 @@ function sendData() {
                     } else if (msg.type === "Flushed") {
                         console.log("Flushed received");
 
+                        console.log(audioChunks);
                         // All data received, now combine chunks and play audio
                         const blob = new Blob(audioChunks, { type: "audio/wav" });
 
