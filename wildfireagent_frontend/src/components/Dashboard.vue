@@ -34,7 +34,7 @@ onMounted(async () => {
 // Watching Items state
 const watchingItems = ref([
   { id: `33389`, name: "Line Fire", bg: "bg-red-500" },
-  { id: `33389`, name: "Airport Fire", bg: "bg-green-500" }
+  { id: `33685`, name: "Bridge Fire", bg: "bg-green-500" }
 ]);
 
 // Function to add a new Watching Item
@@ -86,7 +86,6 @@ const addWatchingItem = () => {
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
