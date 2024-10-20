@@ -6,11 +6,19 @@ const props = defineProps({
     type: String,
     required: true
   },
+  name: {
+    type: String,
+    required: true
+  },
+  session_id: {
+    type: String,
+    required: true
+  }
 })
 
 
 
-const chatMessages = ref([{sender: 'bot', text: `What would you like to know about FIRE ${props.id}`,}]);
+const chatMessages = ref([{sender: 'bot', text: `Hello, what would you like to know about the ${props.name}?`,}]);
 const chatContainer = ref(null);
 
 // Function to handle user message input
