@@ -21,10 +21,15 @@ function calcDistance(coords1, coords2) {
   return distance;
 }
 
-export function sortLocationsByProximity(locations, userCoords) {
+export default function getNClosestLocations(locations, userCoords, n=3) {
+  console.log("getnclosestlocations")
+  // insert distance to fire from user coords
+  for (let i=0; i<locations.length;i++)
+  {
+    locations[i].proximity = calcDistance(userCoords, locations[i])
+  }
+
   return locations.sort((a, b) => {
-    const distanceA = calcDistance(userCoords, a.coords);
-    const distanceB = calcDistance(userCoords, b.coords);
-    return distanceA - distanceB; // Sort by closest distance
-  });
+    return a.proximity - b.proximity; // Sort by closest distance
+  }).slice(0, n);
 }

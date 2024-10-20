@@ -303,6 +303,22 @@ def get_fire_info():
 def get_single_info():
     return jsonify(get_fire_summary(request.args["geo_id"]))
 
+@app.route('/api/v1/get_latest_news_batch', methods=['GET'])
+def get_latest_news_batch():
+    # Get 'fire_ids' from the query string
+    fire_ids = request.args.getlist('fire_ids')
+
+    if not fire_ids:
+        return jsonify({"error": "fire_ids parameter is required"}), 400
+
+    news_data = []
+    for fire_id in fire_ids:
+        summary = get_fire_summary(fire_id)
+        news_data.append({"id": fire_id, "headline": summary["messages"]["summary"][0]["message"]})
+
+    return jsonify(news_data), 200
+
+
 @app.route("/<path:filename>")
 def serve_others(filename):
     return send_from_directory(app.static_folder, filename)
