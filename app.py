@@ -228,10 +228,15 @@ def hello(websocket):
 
                     dg_connection.send_text(llm_output)
 
-                websocket.send(json.dumps({
-                    "user_message_transcribed": text,
-                    "ai_response": model_text
-                }))
+                if media:
+                    websocket.send(json.dumps({
+                        "user_message_transcribed": text,
+                        "ai_response": model_text
+                    }))
+                else:
+                    websocket.send(json.dumps({
+                        "ai_response": model_text
+                    }))
                 with app.app_context():
                     new_chat_ctx = json.loads(chat_session.chat_ctx)
 
