@@ -25,7 +25,7 @@ defineProps({
 <template>
   <GoogleMap
       :api-key="gmaps_api_key"
-      style="width: 100%; height: 250px"
+      style="width: 100%; height: 100%"
       :center="fireCoordinates[0]"
       :zoom="12"
   >
