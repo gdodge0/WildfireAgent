@@ -1,11 +1,19 @@
 import requests
+import os
 from redis import StrictRedis
 from redis_cache import RedisCache
+from dotenv import load_dotenv
 
-client = StrictRedis(host="localhost", decode_responses=True)
+load_dotenv()
+
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PORT = os.environ.get("REDIS_PORT")
+
+client = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 cache = RedisCache(redis_client=client)
 
-@cache.cache(ttl=(60*60))
+
+@cache.cache(ttl=(60 * 60))
 def get_current_fires():
     r = requests.get('https://api.watchduty.org/api/v1/geo_events/?is_relevant=false&geo_event_types=wildfire')
     if r.status_code != 200:
@@ -13,7 +21,8 @@ def get_current_fires():
 
     return r.json()
 
-@cache.cache(ttl=(60*60))
+
+@cache.cache(ttl=(60 * 60))
 def get_fire_summary(geo_id):
     fire = Fire(geo_id)
     return fire.return_summary()
@@ -24,7 +33,8 @@ class Fire:
         self.geo_id = geo_id
 
     def get_reporter_information(self):
-        r = requests.get(f'https://api.watchduty.org/api/v1/reports/?geo_event_id={self.geo_id}&is_moderated=true&is_active=true&limit=100&offset=0')
+        r = requests.get(
+            f'https://api.watchduty.org/api/v1/reports/?geo_event_id={self.geo_id}&is_moderated=true&is_active=true&limit=100&offset=0')
 
         if r.status_code != 200:
             return {}
