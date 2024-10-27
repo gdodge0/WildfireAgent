@@ -31,12 +31,25 @@ jobs:
       working-directory: wildfireagent_frontend
     - run: npm run build
       working-directory: wildfireagent_frontend
+
+    - run: |
+        mkdir build
+        cp "./websocket_server.py" "./build/websocket_server.py"
+        cp "./requirements.txt" "./build/requirements.txt"
+        cp "./prompt.txt" "./build/prompt.txt"
+        cp "./helpers.py" "./build/helpers.py"
+        cp "./Dockerfile" "./build/Dockerfile"
+        cp "./app.py" "./build/app.py"
+        mv "./models" "./build/models"
+        mv "./migrations" "./build/migrations"
+        mv "./api" "./build/api"
+        mv "./wildfireagent_frontend/dist" "./build/dist"
       
     - name: deploy build
       uses: s0/git-publish-subdir-action@develop
       env:
           REPO: self
           BRANCH: build # The branch name where you want to push the assets
-          FOLDER: build # The directory where your assets are generated
+          FOLDER: build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
           MESSAGE: "Build: ({sha}) {msg}" # The commit message
