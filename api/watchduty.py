@@ -1,26 +1,15 @@
 import requests
 import os
-from redis import StrictRedis
+from redis import Redis
 from redis_cache import RedisCache
 from dotenv import load_dotenv
 
 load_dotenv()
 
-REDIS_HOST = os.environ.get("REDIS_HOST")
-REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_URL = os.getenv("REDIS_URL")
 
-if os.environ.get("USE_REDIS_AUTH") == "true":
-    REDIS_USERNAME = os.environ.get("REDIS_USERNAME")
-    REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
-else:
-    REDIS_USERNAME = None
-    REDIS_PASSWORD = None
-
-client = StrictRedis(host=REDIS_HOST,
-                     port=REDIS_PORT,
-                     username=REDIS_USERNAME,
-                     password=REDIS_PASSWORD,
-                     decode_responses=True)
+client = Redis.from_url(REDIS_URL,
+               decode_responses=True)
 
 cache = RedisCache(redis_client=client)
 
