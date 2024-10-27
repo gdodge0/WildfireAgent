@@ -9,7 +9,19 @@ load_dotenv()
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT")
 
-client = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+if os.environ.get("USE_REDIS_AUTH") == "true":
+    REDIS_USERNAME = os.environ.get("REDIS_USERNAME")
+    REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
+else:
+    REDIS_USERNAME = None
+    REDIS_PASSWORD = None
+
+client = StrictRedis(host=REDIS_HOST,
+                     port=REDIS_PORT,
+                     username=REDIS_USERNAME,
+                     password=REDIS_PASSWORD,
+                     decode_responses=True)
+
 cache = RedisCache(redis_client=client)
 
 
