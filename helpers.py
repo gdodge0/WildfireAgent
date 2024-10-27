@@ -1,6 +1,7 @@
 from datetime import datetime
 import pytz
 
+
 def pretty_date_time(date_str):
     # Parse the string as UTC time
     utc = pytz.utc
@@ -28,4 +29,3 @@ def pretty_date_time(date_str):
         return f"{time_str} {day_str}"
     else:
         return f"{time_str} on {day_str}"
-
