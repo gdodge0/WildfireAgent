@@ -26,7 +26,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
 
-app = Flask(__name__, static_folder="./build/dist", static_url_path="/build/dist")
+app = Flask(__name__, static_folder="./dist", static_url_path="/dist")
 
 app.config.from_object(Config)
 migrate = Migrate(app, db)
