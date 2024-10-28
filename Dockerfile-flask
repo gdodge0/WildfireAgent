@@ -11,10 +11,6 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-EXPOSE 3000
 EXPOSE 8080
 
-ADD start.sh /
-RUN chmod +x /start.sh
-
-CMD ["/start.sh"]
+CMD ["waitress-serve", "app:app"]
