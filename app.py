@@ -36,7 +36,8 @@ CORS(app)
 
 
 @app.route('/')
-def index():
+@app.route('/detail/<id>')
+def index(id=None):
     return send_from_directory('dist', 'index.html')
 
 
