@@ -18,7 +18,7 @@ let fireCoords = ref([]);
 // Function to fetch the fire summary
 const fetchFireSummary = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:5000/api/v1/start_chat_session', {
+    const response = await axios.get('/api/v1/start_chat_session', {
       params: {
         geo_id: props.id,
       },
