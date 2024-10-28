@@ -20,6 +20,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      name: Create DotEnv
+    - run: |
+        touch .env
+        echo VITE_APP_API_KEY=${{ secrets.VITE_APP_API_KEY }} >> .env
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
