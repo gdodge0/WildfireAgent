@@ -7,13 +7,13 @@ on:
     branches: [ "main" ]
 
 permissions: write-all
-env:
-  VITE_APP_API_KEY: ${{ secrets.VITE_APP_API_KEY }}
 
 jobs:
   build:
     environment: Production
     runs-on: ubuntu-latest
+    env:
+      VITE_APP_API_KEY: ${{ secrets.VITE_APP_API_KEY }}
 
     strategy:
       matrix:
