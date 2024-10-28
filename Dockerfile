@@ -13,4 +13,7 @@ COPY . .
 
 EXPOSE 8080
 
-CMD [ "waitress-serve", "app:app"]
+ADD start.sh /
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
