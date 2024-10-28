@@ -247,7 +247,8 @@ def hello(websocket):
 
 
 def run_ws():
-    with serve(hello, "localhost", 3000) as server:
+    with serve(hello, "0.0.0.0", 3000) as server:
+        print("starting WS")
         server.serve_forever()
 
 
