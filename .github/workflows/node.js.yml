@@ -8,7 +8,7 @@ on:
 
 permissions: write-all
 env:
-  VITE_APP_API_KEY=${{ secrets.VITE_APP_API_KEY }}
+  VITE_APP_API_KEY: ${{ secrets.VITE_APP_API_KEY }}
 
 jobs:
   build:
