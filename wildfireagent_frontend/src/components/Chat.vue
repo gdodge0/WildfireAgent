@@ -139,7 +139,7 @@ const handleInputSubmit = () => {
 
 // Initialize WebSocket connection when component mounts
 onMounted(() => {
-  ws = new ChatbotWebSocket(props.session_id, 'ws://localhost:3000', isMicActive, isTalking, isLoading);
+  ws = new ChatbotWebSocket(props.session_id, 'ws://'+ location.host + ":3000", isMicActive, isTalking, isLoading);
   ws.connect()
     .then(() => {
       console.log('WebSocket connected');
