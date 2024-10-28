@@ -11,6 +11,7 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+EXPOSE 3000
 EXPOSE 8080
 
 ADD start.sh /
