@@ -1,8 +1,8 @@
 import axios from "axios"
 
-export async function fetchFireItems(){
+export async function fetchFireItems(api_url){
   try {
-    const response = await axios.get('/api/v1/get_fire_info')
+    const response = await axios.get(api_url+'/api/v1/get_fire_info')
     return response.data
   } catch (err) {
       console.log(err)
@@ -10,14 +10,14 @@ export async function fetchFireItems(){
   }
 }
 
-export async function fetchBatchLatestNews(fires) {
+export async function fetchBatchLatestNews(fires, api_url) {
     let fire_ids = []
       fires.forEach((fire) => {
         fire_ids.push(fire.id)
       })
     try {
     const response =
-        await axios.get('/api/v1/get_latest_news_batch', {
+        await axios.get(api_url+'/api/v1/get_latest_news_batch', {
             params: {
                 fire_ids: fire_ids // fire_ids should be an array like [36560, 36643, 36623]
             },

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import FireItem from "@/components/FireItem.vue";
 import WatchingItem from "@/components/WatchingItem.vue";
 import {fetchFireItems, fetchBatchLatestNews} from "@/utils/api.js";
@@ -16,6 +16,10 @@ let closest_3_fires = []
 const error = ref(null);
 let headline_debounce_timout;
 
+// Access global properties using getCurrentInstance()
+const instance = getCurrentInstance()
+const api_url = instance.appContext.config.globalProperties.$api_url
+
 function debounceRefreshHeadlines() {
     clearTimeout(headline_debounce_timout);
     headline_debounce_timout = setTimeout(() => refreshHeadlines(), 1000); // 300ms debounce
@@ -23,7 +27,7 @@ function debounceRefreshHeadlines() {
 
 async function refreshHeadlines(){
   console.log("getting headlines")
-  const news = await fetchBatchLatestNews(fireItems.value)
+  const news = await fetchBatchLatestNews(fireItems.value, api_url)
   news.forEach((headline) => {
     const fire = fireItems.value.find(fire => String(fire.id) === String(headline["id"]));
     fire.news = headline["headline"]
@@ -68,7 +72,7 @@ function performSearch() {
 
 // Fetch the data when the component is mounted
 onMounted(async () => {
-  totalFires = await fetchFireItems();
+  totalFires = await fetchFireItems(api_url);
   promptUserLocation(gatherNearbyFires);
 });
 

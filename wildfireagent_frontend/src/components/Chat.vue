@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, nextTick, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import ChatbotWebSocket from '../utils/chatSession.js'; // Assuming the WebSocket class is in the same folder
 import { marked } from "marked";
 
@@ -29,6 +29,11 @@ const recordedChunks = ref([]); // Store audio data
 const isLoading = ref(false);
 const isTalking = ref(false);
 const userInput = ref('');
+
+// Access global properties using getCurrentInstance()
+const instance = getCurrentInstance()
+const ws_url = instance.appContext.config.globalProperties.$ws_url
+
 let ws; // WebSocket instance
 
 // Toggle microphone state
@@ -139,7 +144,7 @@ const handleInputSubmit = () => {
 
 // Initialize WebSocket connection when component mounts
 onMounted(() => {
-  ws = new ChatbotWebSocket(props.session_id, 'wss://blaze-ws.gdodge.dev', isMicActive, isTalking, isLoading);
+  ws = new ChatbotWebSocket(props.session_id, ws_url, isMicActive, isTalking, isLoading);
   ws.connect()
     .then(() => {
       console.log('WebSocket connected');

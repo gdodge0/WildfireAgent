@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_APP_API_KEY: ${{ secrets.VITE_APP_API_KEY }}
+      WS_URL: ${{ vars.WS_URL }}
 
     strategy:
       matrix:

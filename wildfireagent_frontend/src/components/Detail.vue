@@ -2,7 +2,7 @@
 import GoogleMap from "@/components/GoogleMap.vue";
 import Chat from "@/components/Chat.vue";
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -15,10 +15,14 @@ const props = defineProps({
 let session_id = ref(null);
 const fire_name = ref(null);
 let fireCoords = ref([]);
+
+// Access global properties using getCurrentInstance()
+const instance = getCurrentInstance()
+const api_url = instance.appContext.config.globalProperties.$api_url
 // Function to fetch the fire summary
 const fetchFireSummary = async () => {
   try {
-    const response = await axios.get('/api/v1/start_chat_session', {
+    const response = await axios.get(api_url+'/api/v1/start_chat_session', {
       params: {
         geo_id: props.id,
       },
