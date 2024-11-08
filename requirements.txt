@@ -64,7 +64,7 @@ typing_extensions==4.12.2
 uritemplate==4.1.1
 urllib3==2.2.3
 websockets==13.1
-Werkzeug==3.0.4
+Werkzeug==3.0.6
 yarl==1.15.5
 ## The following requirements were added by pip freeze:
 alembic==1.13.3
