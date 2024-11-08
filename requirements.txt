@@ -64,7 +64,7 @@ typing_extensions==4.12.2
 uritemplate==4.1.1
 urllib3==2.2.3
 websockets==13.1
-Werkzeug==3.0.6
+Werkzeug==3.0.4
 yarl==1.15.5
 ## The following requirements were added by pip freeze:
 alembic==1.13.3
@@ -76,4 +76,4 @@ psycopg2-binary==2.9.10
 python-redis-cache==4.0.1
 pytz==2024.2
 redis==5.2.0
-waitress==3.0.0
+waitress==3.0.1
