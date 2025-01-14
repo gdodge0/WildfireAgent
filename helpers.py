@@ -5,7 +5,7 @@ import pytz
 def pretty_date_time(date_str):
     # Parse the string as UTC time
     utc = pytz.utc
-    dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
+    dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
     dt_utc = utc.localize(dt)  # Localize as UTC time
 
     # Convert UTC to PST (Pacific Standard Time)
