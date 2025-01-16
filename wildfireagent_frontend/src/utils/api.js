@@ -11,6 +11,8 @@ export async function fetchFireItems(api_url){
 }
 
 export async function fetchBatchLatestNews(fires, api_url) {
+    console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
     let fire_ids = []
       fires.forEach((fire) => {
         fire_ids.push(fire.id)
