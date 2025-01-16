@@ -42,7 +42,7 @@ def index(id=None):
 
 
 @cross_origin()
-@app.route('/api/v1/start_chat_session')
+@app.route('t/api/v1/start_chat_session')
 def start_LLM_session():
     geo_id = request.args["geo_id"]
 
@@ -98,6 +98,7 @@ def get_single_info():
 @app.route('/api/v1/get_latest_news_batch', methods=['GET'])
 def get_latest_news_batch():
     # Get 'fire_ids' from the query string
+    tz = request.args["tz"]
     fire_ids = request.args.getlist('fire_ids')
 
     if not fire_ids:
@@ -109,7 +110,7 @@ def get_latest_news_batch():
         news_data.append({
             "id": fire_id,
             "headline": summary["messages"]["summary"][0]["message"],
-            "time": pretty_date_time(summary["messages"]["summary"][0]["timestamp"])
+            "time": pretty_date_time(summary["messages"]["summary"][0]["timestamp"], tz)
         })
 
     return jsonify(news_data), 200
