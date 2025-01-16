@@ -19,6 +19,7 @@ export async function fetchBatchLatestNews(fires, api_url) {
     const response =
         await axios.get(api_url+'/api/v1/get_latest_news_batch', {
             params: {
+                tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 fire_ids: fire_ids // fire_ids should be an array like [36560, 36643, 36623]
             },
             paramsSerializer: params => {
