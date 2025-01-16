@@ -42,7 +42,7 @@ def index(id=None):
 
 
 @cross_origin()
-@app.route('t/api/v1/start_chat_session')
+@app.route('/api/v1/start_chat_session')
 def start_LLM_session():
     geo_id = request.args["geo_id"]
 
