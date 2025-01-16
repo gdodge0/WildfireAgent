@@ -11,8 +11,6 @@ export async function fetchFireItems(api_url){
 }
 
 export async function fetchBatchLatestNews(fires, api_url) {
-    console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
-
     let fire_ids = []
       fires.forEach((fire) => {
         fire_ids.push(fire.id)
@@ -24,11 +22,17 @@ export async function fetchBatchLatestNews(fires, api_url) {
                 tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 fire_ids: fire_ids // fire_ids should be an array like [36560, 36643, 36623]
             },
-            paramsSerializer: params => {
+            paramsSerializer: (params) => {
                 return Object.keys(params)
-                    .map(key => params[key].map(id => `${key}=${id}`).join('&'))
-                    .join('&');
-            }
+                  .map((key) => {
+                    const value = params[key];
+                    if (Array.isArray(value)) {
+                      return value.map((item) => `${key}=${encodeURIComponent(item)}`).join('&');
+                    }
+                    return `${key}=${encodeURIComponent(value)}`;
+                  })
+                  .join('&');
+              },
         })
         return response.data
   } catch (err) {
